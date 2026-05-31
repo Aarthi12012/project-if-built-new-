@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>💌 Future Messages</title>
+
+<style>
+
+body{
+font-family:Arial,sans-serif;
+background:#0f172a;
+color:white;
+text-align:center;
+padding:20px;
+}
+
+.container{
+max-width:800px;
+margin:auto;
+}
+
+h1{
+color:#38bdf8;
+}
+
+button{
+padding:15px 25px;
+font-size:18px;
+background:#38bdf8;
+color:white;
+border:none;
+border-radius:10px;
+cursor:pointer;
+margin-top:20px;
+}
+
+button:hover{
+background:#0ea5e9;
+}
+
+.message{
+margin-top:30px;
+padding:25px;
+background:rgba(255,255,255,0.08);
+border-radius:15px;
+display:none;
+}
+
+a{
+display:inline-block;
+margin-top:25px;
+padding:10px 20px;
+background:#22c55e;
+color:white;
+text-decoration:none;
+border-radius:10px;
+}
+
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<h1>💌 Message From Future Me</h1>
+
+<p>
+Click the button to receive a message from your future self.
+</p>
+
+<button onclick="generateMessage()">
+🚀 Receive Future Message
+</button>
+
+<div class="message" id="messageBox">
+
+<h2>📡 Transmission Received</h2>
+
+<p id="futureText"></p>
+
+</div>
+
+<a href="index.html">🏠 Back Home</a>
+
+</div>
+
+<script>
+
+function generateMessage(){
+
+const messages=[
+
+"Hello from 2035! You kept going even when things were difficult.",
+
+"Your future self is proud of the effort you put in today.",
+
+"Keep learning. The skills you build now will help you later.",
+
+"You achieved goals that once seemed impossible.",
+
+"Never stop dreaming. Your future is brighter than you imagine.",
+
+"The challenges you're facing today made you stronger.",
+
+"You continued creating amazing projects and inspiring others."
+
+];
+
+const randomMessage=
+messages[
+Math.floor(
+Math.random()*messages.length
+)
+];
+
+document.getElementById(
+"futureText"
+).innerHTML=
+randomMessage;
+
+document.getElementById(
+"messageBox"
+).style.display=
+"block";
+
+}
+
+</script>
+
+</body>
+</html>
