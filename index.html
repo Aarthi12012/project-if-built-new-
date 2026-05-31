@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pocket Money Manager</title>
+    <style>
+        /* Premium Color Themes */
+        :root[data-theme="dark"] {
+            --bg-primary: #0f172a;
+            --surface: #1e293b;
+            --surface-hover: #334155;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-color: #334155;
+            --accent-income: #10b981;
+            --accent-expense: #ef4444;
+            --accent-blue: #3b82f6;
+            --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+            --input-bg: #0f172a;
+        }
+
+        :root[data-theme="light"] {
+            --bg-primary: #f8fafc;
+            --surface: #ffffff;
+            --surface-hover: #f1f5f9;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --accent-income: #10b981;
+            --accent-expense: #ef4444;
+            --accent-blue: #3b82f6;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            --input-bg: #ffffff;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            transition: background-color 0.2s ease, color 0.2s ease;
+        }
+
+        body {
+            background-color: #0f172a;
+            color: #f8fafc;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 1.5rem;
+        }
+
+        /* STAGE 1: THEME SELECTOR SPLASH */
+        .theme-gate-screen {
+            display: flex;
+            width: 100%;
+            max-width: 800px;
+            height: 450px;
+            background: #1e293b;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            border: 1px solid #334155;
+        }
+
+        .theme-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .panel-light { background-color: #f8fafc; color: #0f172a; }
+        .panel-dark { background-color: #0f172a; color: #f8fafc; }
+
+        .theme-panel h3 { font-size: 1.75rem; margin-bottom: 0.5rem; font-weight: 700; }
+        .theme-panel p { font-size: 0.95rem; opacity: 0.7; }
+        .theme-icon { font-size: 3.5rem; margin-bottom: 1rem; }
+
+        /* STAGE 2: ACCOUNT CREATION SCREEN */
+        .auth-screen {
+            display: none;
+            background: var(--surface);
+            color: var(--text-main);
+            padding: 2.5rem;
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+            width: 100%;
+            max-width: 420px;
+        }
+
+        .auth-header { text-align: center; margin-bottom: 2rem; }
+        .auth-header h2 { font-size: 1.75rem; margin-bottom: 0.5rem; }
+        .auth-header p { color: var(--text-muted); font-size: 0.9rem; }
+
+        /* Password Input Wrapper with Eye Feature */
+        .password-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .password-container input { padding-right: 2.75rem; }
+
+        .eye-toggle {
+            position: absolute;
+            right: 0.85rem;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 1.15rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .eye-toggle:hover { color: var(--text-main); }
+
+        /* STAGE 3: DASHBOARD WINDOW */
+        .dashboard-window {
+            display: none;
+            width: 100%;
+            max-width: 1050px;
+            align-self: flex-start;
+            margin-top: 1rem;
+        }
+
+        .presentation-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2.5rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 1.5rem;
+            color: var(--text-main);
+        }
+
+        .theme-toggle-btn {
+            background-color: var(--surface);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            padding: 0.6rem 1.2rem;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 0.875rem;
+            cursor: pointer;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .card {
+            background: var(--surface);
+            color: var(--text-main);
+            padding: 1.75rem;
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+        }
+
+        .card-title {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            font-weight: 700;
+        }
+
+        .card-value { font-size: 2.25rem; font-weight: 700; margin-top: 0.5rem; }
+        .value-income { color: var(--accent-income); }
+        .value-expense { color: var(--accent-expense); }
+
+        .workspace-grid {
+            display: grid;
+            grid-template-columns: 1.2fr 1.8fr;
+            gap: 2rem;
+        }
+
+        @media (max-width: 850px) { .workspace-grid { grid-template-columns: 1fr; } }
+
+        .form-group { margin-bottom: 1.25rem; }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        input, select {
+            width: 100%;
+            padding: 0.85rem;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            font-size: 1rem;
+            background-color: var(--input-bg);
+            color: var(--text-main);
+            outline: none;
+        }
+
+        button.action-btn {
+            width: 100%;
+            padding: 0.85rem;
+            background-color: var(--accent-blue);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .analytics-container {
+            background: var(--input-bg);
+            padding: 1.25rem;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 1.5rem;
+        }
+
+        .bar-track {
+            display: flex;
+            height: 14px;
+            background-color: var(--border-color);
+            border-radius: 30px;
+            overflow: hidden;
+            margin-top: 0.5rem;
+        }
+
+        .bar-fill-inc { width: 0%; background: var(--accent-income); transition: width 0.4s; }
+        .bar-fill-exp { width: 0%; background: var(--accent-expense); transition: width 0.4s; }
+
+        .analytics-meta {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 0.6rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .ledger-wrapper { max-height: 290px; overflow-y: auto; }
+
+        .ledger-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            margin-bottom: 0.75rem;
+        }
+
+        .row-desc { font-weight: 600; }
+        .row-date { font-size: 0.75rem; color: var(--text-muted); display: block; margin-top: 0.25rem; }
+        .row-value { font-weight: 700; }
+    </style>
+</head>
+<body>
+
+    <div class="theme-gate-screen" id="themeGateBox">
+        <div class="theme-panel panel-light" onclick="selectInitialTheme('light')">
+            <div class="theme-icon">☀️</div>
+            <h3>Light Mode</h3>
+            <p>Clean, crisp, classic desktop styling</p>
+        </div>
+        <div class="theme-panel panel-dark" onclick="selectInitialTheme('dark')">
+            <div class="theme-icon">🌙</div>
+            <h3>Night Mode</h3>
+            <p>Sleek, modern neon tech workspace</p>
+        </div>
+    </div>
+
+
+    <div class="auth-screen" id="authBox">
+        <div class="auth-header">
+            <h2>Create Account</h2>
+            <p>Setup your dashboard credentials</p>
+        </div>
+        <form onsubmit="handleUserRegistration(event)">
+            <div class="form-group">
+                <label for="usernameInput">Username</label>
+                <input type="text" id="usernameInput" placeholder="Enter username" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="passwordInput">Password</label>
+                <div class="password-container">
+                    <input type="password" id="passwordInput" placeholder="Enter password" required>
+                    <button type="button" class="eye-toggle" onclick="togglePasswordVisibility()" id="eyeBtn">👁️</button>
+                </div>
+            </div>
+            
+            <button type="submit" class="action-btn" style="margin-top: 1.5rem;">Access Dashboard</button>
+        </form>
+    </div>
+
+
+    <div class="dashboard-window" id="dashboardBox">
+        <header class="presentation-header">
+            <h2>Welcome, <span id="userGreeting" style="color:var(--accent-blue)">User</span>!</h2>
+            <button class="theme-toggle-btn" id="headerThemeBtn" onclick="toggleTheme()">🌙 Night Mode</button>
+        </header>
+
+        <section class="summary-grid">
+            <div class="card">
+                <div class="card-title">Total Income</div>
+                <div class="card-value value-income" id="totalIncome">₹0.00</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Total Expenses</div>
+                <div class="card-value value-expense" id="totalExpenses">₹0.00</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Remaining Balance</div>
+                <div class="card-value" id="netBalance">₹0.00</div>
+            </div>
+        </section>
+
+        <div class="workspace-grid">
+            <div class="card">
+                <h3 style="margin-bottom: 1.5rem;">Add Transaction</h3>
+                <form onsubmit="addTransactionItem(event)" id="txForm">
+                    <div class="form-group">
+                        <label for="itemDesc">Description</label>
+                        <input type="text" id="itemDesc" placeholder="e.g., Allowance, Snacks, Books" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="itemType">Type</label>
+                        <select id="itemType">
+                            <option value="income">Income (+)</option>
+                            <option value="expense">Expense (-)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="itemAmount">Amount (₹)</label>
+                        <input type="number" id="itemAmount" placeholder="0.00" min="0.01" step="0.01" required>
+                    </div>
+                    <button type="submit" class="action-btn">Log Item</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <h3 style="margin-bottom: 1.5rem;">Live Summaries</h3>
+                
+                <div class="analytics-container">
+                    <label class="card-title" style="font-size: 0.75rem;">Income vs Expense Split</label>
+                    <div class="bar-track">
+                        <div id="barInc" class="bar-fill-inc"></div>
+                        <div id="barExp" class="bar-fill-exp"></div>
+                    </div>
+                    <div class="analytics-meta">
+                        <span id="lblInc" style="color: var(--accent-income)">Income: 0%</span>
+                        <span id="lblExp" style="color: var(--accent-expense)">Expenses: 0%</span>
+                    </div>
+                </div>
+
+                <div class="ledger-wrapper" id="ledgerBox"></div>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        let transactionsList = [];
+
+        // 1. Initial Gate Theme Chooser
+        function selectInitialTheme(themeMode) {
+            document.documentElement.setAttribute('data-theme', themeMode);
+            document.body.style.backgroundColor = 'var(--bg-primary)';
+            document.body.style.color = 'var(--text-main)';
+            document.getElementById('headerThemeBtn').innerText = themeMode === 'dark' ? '☀️ Light Mode' : '🌙 Night Mode';
+            
+            document.getElementById('themeGateBox').style.display = 'none';
+            document.getElementById('authBox').style.display = 'block';
+        }
+
+        // Password Show/Hide Toggle Engine
+        function togglePasswordVisibility() {
+            const passInput = document.getElementById('passwordInput');
+            const eyeBtn = document.getElementById('eyeBtn');
+            
+            if (passInput.type === 'password') {
+                passInput.type = 'text';
+                eyeBtn.innerText = '🙈';
+            } else {
+                passInput.type = 'password';
+                eyeBtn.innerText = '👁️';
+            }
+        }
+
+        // Account Registration Handling
+        function handleUserRegistration(event) {
+            event.preventDefault();
+            const username = document.getElementById('usernameInput').value;
+            
+            document.getElementById('userGreeting').innerText = username;
+            
+            document.getElementById('authBox').style.display = 'none';
+            document.getElementById('dashboardBox').style.display = 'block';
+            document.body.style.alignItems = 'flex-start';
+            
+            renderDataPipeline();
+        }
+
+        // Add Transaction Handler
+        function addTransactionItem(event) {
+            event.preventDefault();
+            
+            const desc = document.getElementById('itemDesc').value;
+            const type = document.getElementById('itemType').value;
+            const amount = parseFloat(document.getElementById('itemAmount').value);
+            const dateStr = new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+
+            transactionsList.unshift({ desc, type, amount, date: dateStr });
+            
+            renderDataPipeline();
+            document.getElementById('txForm').reset();
+        }
+
+        // Live calculation and interface render loop
+        function renderDataPipeline() {
+            let totalIn = 0;
+            let totalOut = 0;
+            const container = document.getElementById('ledgerBox');
+            container.innerHTML = '';
+
+            transactionsList.forEach(item => {
+                if (item.type === 'income') totalIn += item.amount;
+                else totalOut += item.amount;
+
+                const row = document.createElement('div');
+                row.className = 'ledger-row';
+                row.innerHTML = `
+                    <div>
+                        <span class="row-desc">${item.desc}</span>
+                        <span class="row-date">${item.date}</span>
+                    </div>
+                    <span class="row-value ${item.type === 'income' ? 'value-income' : 'value-expense'}">
+                        ${item.type === 'income' ? '+' : '-'}₹${item.amount.toFixed(2)}
+                    </span>
+                `;
+                container.appendChild(row);
+            });
+
+            const netBalance = totalIn - totalOut;
+            document.getElementById('totalIncome').innerText = `₹${totalIn.toFixed(2)}`;
+            document.getElementById('totalExpenses').innerText = `₹${totalOut.toFixed(2)}`;
+            document.getElementById('netBalance').innerText = `₹${netBalance.toFixed(2)}`;
+
+            const totalCombined = totalIn + totalOut;
+            if(totalCombined > 0) {
+                const incPercent = (totalIn / totalCombined) * 100;
+                const expPercent = (totalOut / totalCombined) * 100;
+                document.getElementById('barInc').style.width = `${incPercent}%`;
+                document.getElementById('barExp').style.width = `${expPercent}%`;
+                document.getElementById('lblInc').innerText = `Income: ${Math.round(incPercent)}%`;
+                document.getElementById('lblExp').innerText = `Expenses: ${Math.round(expPercent)}%`;
+            } else {
+                document.getElementById('barInc').style.width = '0%';
+                document.getElementById('barExp').style.width = '0%';
+                document.getElementById('lblInc').innerText = 'Income: 0%';
+                document.getElementById('lblExp').innerText = 'Expenses: 0%';
+            }
+        }
+
+        // Dashboard Top Bar Theme Switcher
+        function toggleTheme() {
+            const root = document.documentElement;
+            const btn = document.getElementById('headerThemeBtn');
+            if (root.getAttribute('data-theme') === 'dark') {
+                root.setAttribute('data-theme', 'light');
+                btn.innerText = '🌙 Night Mode';
+            } else {
+                root.setAttribute('data-theme', 'dark');
+                btn.innerText = '☀️ Light Mode';
+            }
+        }
+    </script>
+</body>
+</html>
